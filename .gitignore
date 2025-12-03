@@ -1,0 +1,73 @@
+############################
+# Node / JS
+############################
+node_modules/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+############################
+# Next.js
+############################
+.next/
+out/
+.vercel/
+.cache/
+
+# static exports
+export/
+
+############################
+# Build
+############################
+dist/
+build/
+
+############################
+# Environment & Secrets
+############################
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+############################
+# OS / Editor
+############################
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+############################
+# TypeScript
+############################
+*.tsbuildinfo
+
+############################
+# Supabase
+############################
+supabase/.branches
+supabase/.temp
+supabase/.config
+supabase/migrations/*.json
+
+############################
+# Chrome Extension
+############################
+extension/*.zip
+extension/packaged/
+extension/build/
+
+############################
+# Misc
+############################
+*.pid
+*.seed
+coverage/
+reports/

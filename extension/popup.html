@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WinkLab AI Agent</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 400px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      padding: 0;
+    }
+
+    .header {
+      padding: 1.5rem;
+      background: rgba(0,0,0,0.1);
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+
+    .header p {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 1.5rem;
+    }
+
+    .status {
+      background: rgba(255,255,255,0.1);
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      border-left: 3px solid rgba(255,255,255,0.5);
+    }
+
+    .status-label {
+      font-size: 0.875rem;
+      opacity: 0.9;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-value {
+      font-size: 1.125rem;
+      font-weight: bold;
+    }
+
+    .info-box {
+      background: rgba(0,0,0,0.1);
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .button {
+      width: 100%;
+      padding: 0.75rem;
+      background: white;
+      color: #3b82f6;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    .button:hover {
+      background: #f0f0f0;
+    }
+
+    .footer {
+      padding: 1rem 1.5rem;
+      font-size: 0.75rem;
+      opacity: 0.8;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>WinkLab AI Agent</h1>
+    <p>Automatisation des emails</p>
+  </div>
+
+  <div class="content">
+    <div class="status">
+      <div class="status-label">État de l'agent</div>
+      <div class="status-value" id="status">Actif ✓</div>
+    </div>
+
+    <div class="info-box">
+      <strong>Instructions:</strong>
+      <br>1. Allez sur WinkLab
+      <br>2. Mettez des candidats dans "Entretien responsable"
+      <br>3. Cliquez sur "📧 Envoyer email" sur les cartes
+      <br>4. L'email sera envoyé avec IA personnalisée
+    </div>
+
+    <button class="button" id="openDashboard">
+      Ouvrir le Dashboard
+    </button>
+  </div>
+
+  <div class="footer">
+    <p>Version 1.0.0 | WinkLab AI Agent</p>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

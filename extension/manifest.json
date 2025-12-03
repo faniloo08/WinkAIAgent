@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "WinkLab AI Agent",
+  "version": "1.0.0",
+  "description": "Automatise l'envoi d'emails pour les candidats en entretien sur WinkLab",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs",
+    "windows"
+  ],
+  "host_permissions": [
+    "https://app.wink-lab.com/*",
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://app.wink-lab.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "WinkLab AI Agent"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "chat.html",
+        "chat.js",
+        "styles.css"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Assistant RH</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="chat-wrapper">
+    <div class="chat-header">
+      <h2>🤖 Assistant RH</h2>
+      <p>Posez-moi vos questions sur les entretiens</p>
+    </div>
+        <!-- Messages Area -->
+    <div id="messages-area" class="messages-area">
+      <div id="initial-message" class="message bot-message">
+        <div class="message-content">
+          <p>Bonjour! Je suis l'Assistant IA WinkLab. Je peux vous aider avec:</p>
+          <ul class="features-list">
+            <li>📧 Envoyer des emails de convocation d'entretien</li>
+            <li>🔔 Envoyer des relances de confirmation</li>
+            <li>📊 Consulter le tableau de bord des candidats</li>
+            <li>✅ Vous notifier des confirmations</li>
+          </ul>
+          <p>Comment puis-je vous aider?</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Container pour les messages -->
+    <div id="chatContainer" class="chat-container">
+      <!-- Les messages s'afficheront ici -->
+    </div>
+
+    <!-- Indicateur de saisie -->
+    <div id="typingIndicator" class="typing-indicator">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <!-- Zone de saisie -->
+    <div class="chat-input-wrapper">
+      <input 
+        type="text" 
+        id="messageInput" 
+        placeholder="Tapez votre message..."
+        autocomplete="off"
+      />
+      <button id="sendBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="chat.js"></script>
+</body>
+</html>
