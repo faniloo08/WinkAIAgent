@@ -25,16 +25,7 @@ npm install
 
 Créez un fichier `.env.local` à la racine du projet :
 
-\`\`\`
-OPENROUTER_API_KEY=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
-EMAILJS_SERVICE_ID=service_sb48lx5
-EMAILJS_TEMPLATE_ID=template_txe45dg
-EMAILJS_PUBLIC_KEY=UXOOUqbIlA_WWBoVw
 
-NEXT_PUBLIC_EMAILJS_SERVICE_ID=service_sb48lx5
-NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=template_txe45dg
-NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=UXOOUqbIlA_WWBoVw
-\`\`\`
 
 ### 4. Démarrer le serveur local
 
