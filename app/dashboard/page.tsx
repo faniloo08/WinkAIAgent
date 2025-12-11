@@ -152,6 +152,43 @@ export default function Dashboard() {
 
   return (
     <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
+      <div style={{ 
+        padding: "15px", 
+        background: "white", 
+        borderBottom: "1px solid #e5e7eb",
+        marginBottom: "1rem"
+      }}>
+        <button
+          onClick={() => {
+            // Si on est dans un popup d'extension
+            if (window.opener) {
+              window.close() // Ferme la fenêtre et retourne au popup
+            } else {
+              // Sinon, retour navigateur classique
+              window.history.back()
+            }
+          }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "8px 16px",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: "500",
+            transition: "transform 0.2s",
+            border: "none",
+            cursor: "pointer",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          ← Retour au chat
+        </button>
+      </div>
       <header style={{ marginBottom: "2rem" }}>
         <h1
           style={{

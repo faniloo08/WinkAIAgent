@@ -111,7 +111,7 @@ function generateEmailTemplate(payload: EmailPayload, aiGeneratedBody: string): 
               <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <a href="http://localhost:3000/confirmation-success" 
+                    <a href="http://localhost:3000/confirmation-success?email=${encodeURIComponent(payload.candidateEmail)}"  
                        style="display: inline-block; padding: 15px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);">
                       Confirmer ma présence
                     </a>

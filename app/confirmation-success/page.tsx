@@ -7,11 +7,16 @@ export default function ConfirmationSuccess() {
   const searchParams = useSearchParams()
   const email = searchParams.get("email")
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
+  const [errorMessage, setErrorMessage] = useState<string>("")
 
   useEffect(() => {
+    console.log("[Confirmation] Page loaded with email:", email)
+    
     if (email) {
       confirmInterview(email)
     } else {
+      console.error("[Confirmation] No email in URL")
+      setErrorMessage("Aucune adresse email fournie dans l'URL")
       setStatus("error")
     }
   }, [email])
@@ -33,15 +38,17 @@ export default function ConfirmationSuccess() {
 
       if (response.ok) {
         const data = await response.json()
-        console.log("[Confirmation] Success:", data)
+        console.log("[Confirmation] ✅ Success:", data)
         setStatus("success")
       } else {
         const errorData = await response.json()
-        console.error("[Confirmation] Error:", errorData)
+        console.error("[Confirmation] ❌ Error:", errorData)
+        setErrorMessage(errorData.error || "Erreur inconnue")
         setStatus("error")
       }
     } catch (error) {
-      console.error("[Confirmation] Exception:", error)
+      console.error("[Confirmation] ❌ Exception:", error)
+      setErrorMessage(error instanceof Error ? error.message : "Erreur de connexion")
       setStatus("error")
     }
   }
@@ -78,6 +85,9 @@ export default function ConfirmationSuccess() {
             <h1 style={{ fontSize: "1.5rem", marginBottom: "0.5rem", color: "#333" }}>
               Confirmation en cours...
             </h1>
+            <p style={{ fontSize: "0.9rem", color: "#666" }}>
+              Veuillez patienter
+            </p>
           </>
         )}
 
@@ -92,7 +102,8 @@ export default function ConfirmationSuccess() {
               alignItems: "center",
               justifyContent: "center",
               margin: "0 auto 1.5rem",
-              fontSize: "3rem"
+              fontSize: "3rem",
+              color: "white"
             }}>
               ✓
             </div>
@@ -161,6 +172,24 @@ export default function ConfirmationSuccess() {
             }}>
               Une erreur s'est produite lors de la confirmation.
             </p>
+            {errorMessage && (
+              <div style={{
+                backgroundColor: "#fef2f2",
+                padding: "1rem",
+                borderRadius: "8px",
+                border: "1px solid #fecaca",
+                marginBottom: "1rem"
+              }}>
+                <p style={{ margin: 0, color: "#991b1b", fontSize: "0.9rem" }}>
+                  <strong>Détails :</strong> {errorMessage}
+                </p>
+              </div>
+            )}
+            {email && (
+              <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "1rem" }}>
+                Email concerné : <strong>{email}</strong>
+              </p>
+            )}
             <p style={{ fontSize: "0.9rem", color: "#999" }}>
               Veuillez contacter l'équipe RH directement.
             </p>
