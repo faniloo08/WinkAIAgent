@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   messageInput = document.getElementById('messageInput')
   sendBtn = document.getElementById('sendBtn')
   typingIndicator = document.getElementById('typingIndicator')
+  const copyPromptBtn = document.getElementById('copyPromptBtn')
   
   // Vérifier que tous les éléments existent
   if (!chatContainer) {
@@ -49,7 +50,37 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sendBtn) {
     sendBtn.addEventListener('click', handleSendMessage)
   }
+  
+  // Gérer la copie du prompt
+  if (copyPromptBtn) {
+    copyPromptBtn.addEventListener('click', copyPrompt)
+  }
 })
+
+// Fonction pour copier le prompt
+function copyPrompt() {
+  const promptText = "adresse email du candidat: fanilo@bnjteammaker.fr; le nom c'est Fanilo; Poste: Designer; date d'entretien: 10/12/2025; heure à 13:50; cela durera 30mn; modalité: Visioconférence."
+  
+  const copyPromptBtn = document.getElementById('copyPromptBtn')
+  
+  navigator.clipboard.writeText(promptText).then(() => {
+    const originalHTML = copyPromptBtn.innerHTML
+    copyPromptBtn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      Copié !
+    `
+    copyPromptBtn.classList.add('copied')
+    
+    setTimeout(() => {
+      copyPromptBtn.innerHTML = originalHTML
+      copyPromptBtn.classList.remove('copied')
+    }, 2000)
+  }).catch(err => {
+    console.error('[Chat] Erreur lors de la copie:', err)
+  })
+}
 
 async function handleSendMessage() {
   const message = messageInput.value.trim()
@@ -124,8 +155,11 @@ function addMessage(text, sender) {
   
   chatContainer.appendChild(messageDiv)
   
-  // Scroll vers le bas
-  chatContainer.scrollTop = chatContainer.scrollHeight
+  // Scroll vers le bas de la zone des messages
+  const messagesArea = document.getElementById('messages-area')
+  if (messagesArea) {
+    messagesArea.scrollTop = messagesArea.scrollHeight
+  }
 }
 
 async function getAIResponse(message) {

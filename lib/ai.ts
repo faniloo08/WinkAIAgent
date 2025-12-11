@@ -25,6 +25,8 @@ Quand l'utilisateur veut envoyer un email, tu dois:
 - Demander le poste
 - Demander la date de l'entretien
 - Demander l'heure de l'entretien
+- Demander la durée de l'entretien
+- Demander la Modalité de l'entretien
 
 Une fois tu as toutes les infos, dis "SEND_EMAIL" dans ta réponse.`
 

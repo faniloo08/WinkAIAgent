@@ -3,61 +3,77 @@
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 
-interface Candidate {
+interface EmailHistory {
   id: string
-  email: string
-  name: string
-  position: string
+  candidate_email: string
+  candidate_name: string
+  post_title: string
   status: string
   interview_date: string
   interview_time: string
-  created_at: string
+  sent_at: string
+  confirmed_at: string | null
+  reminder_count: number
+  last_reminder_at: string | null
 }
 
 export default function Dashboard() {
-  const [candidates, setCandidates] = useState<Candidate[]>([])
+  const [emails, setEmails] = useState<EmailHistory[]>([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     total: 0,
     sent: 0,
     confirmed: 0,
-    reminder_sent: 0,
+    declined: 0,
+    no_response: 0,
   })
 
   useEffect(() => {
-    fetchCandidates()
-    const interval = setInterval(fetchCandidates, 5000) // Refresh every 5 seconds
+    fetchEmails()
+    const interval = setInterval(fetchEmails, 5000) // Refresh every 5 seconds
     return () => clearInterval(interval)
   }, [])
 
-  async function fetchCandidates() {
+  async function fetchEmails() {
     try {
-      const { data, error } = await supabase.from("candidates").select("*").order("created_at", { ascending: false })
+      console.log("[Dashboard] Fetching emails from email_history...")
+      
+      const { data, error } = await supabase
+        .from("email_history")
+        .select("*")
+        .order("sent_at", { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error("[Dashboard] Error fetching from email_history:", error)
+        throw error
+      }
 
-      setCandidates(data || [])
+      console.log("[Dashboard] Data received:", data)
+      setEmails(data || [])
 
       // Calculate stats
       const newStats = {
         total: data?.length || 0,
-        sent: data?.filter((c) => c.status === "sent").length || 0,
-        confirmed: data?.filter((c) => c.status === "confirmed").length || 0,
-        reminder_sent: data?.filter((c) => c.status === "reminder_sent").length || 0,
+        sent: data?.filter((e) => e.status === "sent").length || 0,
+        confirmed: data?.filter((e) => e.status === "confirmed").length || 0,
+        declined: data?.filter((e) => e.status === "declined").length || 0,
+        no_response: data?.filter((e) => e.status === "no_response").length || 0,
       }
       setStats(newStats)
       setLoading(false)
     } catch (error) {
-      console.error("[v0] Error fetching candidates:", error)
+      console.error("[Dashboard] Error fetching emails:", error)
       setLoading(false)
     }
   }
 
+  // Real-time updates
   useEffect(() => {
     const channel = supabase
-      .channel("candidates-changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "candidates" }, () => {
-        fetchCandidates()
+      .channel("email-history-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "email_history" }, () => {
+        console.log("[Dashboard] Change detected, refreshing...")
+        fetchEmails()
       })
       .subscribe()
 
@@ -72,7 +88,9 @@ export default function Dashboard() {
         return "#3b82f6"
       case "confirmed":
         return "#10b981"
-      case "reminder_sent":
+      case "declined":
+        return "#ef4444"
+      case "no_response":
         return "#f59e0b"
       default:
         return "#6b7280"
@@ -82,15 +100,53 @@ export default function Dashboard() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "sent":
-        return "Email envoyé"
+        return "Envoyé"
       case "confirmed":
-        return "Confirmé"
-      case "reminder_sent":
-        return "Relance envoyée"
-      case "pending":
-        return "En attente"
+        return "✅ Confirmé"
+      case "declined":
+        return "❌ Refusé"
+      case "no_response":
+        return "⏳ Sans réponse"
       default:
         return status
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
+  }
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
+  async function sendReminder(email: string) {
+    try {
+      const response = await fetch("/api/send-reminder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+
+      if (response.ok) {
+        alert("Rappel envoyé avec succès !")
+        fetchEmails()
+      } else {
+        const error = await response.json()
+        alert(`Erreur: ${error.error}`)
+      }
+    } catch (error) {
+      alert("Erreur lors de l'envoi du rappel")
     }
   }
 
@@ -102,19 +158,26 @@ export default function Dashboard() {
             fontSize: "2rem",
             fontWeight: "bold",
             marginBottom: "0.5rem",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
           }}
         >
-          WinkLab AI Agent - Dashboard
+          🤖 WinkLab AI Agent - Dashboard
         </h1>
-        <p style={{ color: "#666" }}>Gestion de l'automatisation des emails d'entretien</p>
+        <p style={{ color: "#666" }}>
+          Suivi en temps réel des emails d'entretien automatisés
+        </p>
       </header>
 
+      {/* Status Card */}
       <div
         style={{
           backgroundColor: "white",
           padding: "1.5rem",
           borderRadius: "8px",
           boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+          marginBottom: "2rem",
         }}
       >
         <h2
@@ -124,7 +187,7 @@ export default function Dashboard() {
             marginBottom: "1rem",
           }}
         >
-          Statut de l'Agent
+          📡 Statut du système
         </h2>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <div
@@ -133,29 +196,32 @@ export default function Dashboard() {
               height: "12px",
               borderRadius: "50%",
               backgroundColor: "#10b981",
+              animation: "pulse 2s infinite",
             }}
           />
           <span style={{ fontSize: "1rem", color: "#374151" }}>
-            Extension active - En attente de candidats en "Entretien responsable"
+            Extension active - Chatbot opérationnel
           </span>
         </div>
       </div>
 
+      {/* Stats Cards */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
           gap: "1rem",
-          marginTop: "2rem",
           marginBottom: "2rem",
         }}
       >
-        <StatCard label="Total de candidats" value={stats.total} color="#3b82f6" />
-        <StatCard label="Emails envoyés" value={stats.sent} color="#10b981" />
-        <StatCard label="Confirmés" value={stats.confirmed} color="#8b5cf6" />
-        <StatCard label="Relances envoyées" value={stats.reminder_sent} color="#f59e0b" />
+        <StatCard label="📊 Total emails" value={stats.total} color="#667eea" />
+        <StatCard label="📧 Envoyés" value={stats.sent} color="#3b82f6" />
+        <StatCard label="✅ Confirmés" value={stats.confirmed} color="#10b981" />
+        <StatCard label="❌ Refusés" value={stats.declined} color="#ef4444" />
+        <StatCard label="⏳ Sans réponse" value={stats.no_response} color="#f59e0b" />
       </div>
 
+      {/* Table */}
       <section
         style={{
           backgroundColor: "white",
@@ -171,16 +237,22 @@ export default function Dashboard() {
             marginBottom: "1rem",
           }}
         >
-          Historique des Candidats
+          📋 Historique des emails
         </h2>
 
         {loading ? (
-          <p style={{ color: "#666" }}>Chargement...</p>
-        ) : candidates.length === 0 ? (
-          <p style={{ color: "#999" }}>
-            Aucun candidat pour le moment. Quand vous mettrez un candidat en "Entretien responsable" sur WinkLab, il
-            apparaîtra ici.
-          </p>
+          <div style={{ textAlign: "center", padding: "2rem" }}>
+            <p style={{ color: "#666" }}>Chargement...</p>
+          </div>
+        ) : emails.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "3rem", color: "#999" }}>
+            <p style={{ fontSize: "1.2rem", marginBottom: "0.5rem" }}>
+              📭 Aucun email envoyé pour le moment
+            </p>
+            <p style={{ fontSize: "0.9rem" }}>
+              Utilisez le chatbot pour envoyer votre premier email de convocation
+            </p>
+          </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table
@@ -196,115 +268,103 @@ export default function Dashboard() {
                     borderBottom: "2px solid #e5e7eb",
                   }}
                 >
-                  <th
-                    style={{
-                      padding: "1rem",
-                      textAlign: "left",
-                      fontWeight: 600,
-                      color: "#374151",
-                    }}
-                  >
-                    Candidat
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      textAlign: "left",
-                      fontWeight: 600,
-                      color: "#374151",
-                    }}
-                  >
-                    Email
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      textAlign: "left",
-                      fontWeight: 600,
-                      color: "#374151",
-                    }}
-                  >
-                    Poste
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      textAlign: "left",
-                      fontWeight: 600,
-                      color: "#374151",
-                    }}
-                  >
-                    Date entretien
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      textAlign: "left",
-                      fontWeight: 600,
-                      color: "#374151",
-                    }}
-                  >
-                    Statut
-                  </th>
+                  <th style={headerStyle}>Candidat</th>
+                  <th style={headerStyle}>Email</th>
+                  <th style={headerStyle}>Poste</th>
+                  <th style={headerStyle}>Entretien</th>
+                  <th style={headerStyle}>Envoyé le</th>
+                  <th style={headerStyle}>Rappels</th>
+                  <th style={headerStyle}>Statut</th>
+                  <th style={headerStyle}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {candidates.map((candidate) => (
+                {emails.map((email) => (
                   <tr
-                    key={candidate.id}
+                    key={email.id}
                     style={{
                       borderBottom: "1px solid #e5e7eb",
+                      transition: "background-color 0.2s",
                     }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#f9fafb")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = "white")
+                    }
                   >
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "#111827",
-                      }}
-                    >
-                      {candidate.name}
+                    <td style={cellStyle}>
+                      <strong>{email.candidate_name}</strong>
                     </td>
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "#666",
-                        fontSize: "0.9rem",
-                      }}
-                    >
-                      {candidate.email}
+                    <td style={{ ...cellStyle, fontSize: "0.9rem", color: "#666" }}>
+                      {email.candidate_email}
                     </td>
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "#666",
-                      }}
-                    >
-                      {candidate.position}
+                    <td style={cellStyle}>{email.post_title}</td>
+                    <td style={{ ...cellStyle, fontSize: "0.9rem" }}>
+                      {email.interview_date} à {email.interview_time}
                     </td>
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "#666",
-                        fontSize: "0.9rem",
-                      }}
-                    >
-                      {candidate.interview_date && candidate.interview_time
-                        ? `${candidate.interview_date} à ${candidate.interview_time}`
-                        : "Non définie"}
+                    <td style={{ ...cellStyle, fontSize: "0.85rem", color: "#666" }}>
+                      {formatDateTime(email.sent_at)}
                     </td>
-                    <td style={{ padding: "1rem" }}>
+                    <td style={{ ...cellStyle, textAlign: "center" }}>
+                      <span
+                        style={{
+                          display: "inline-block",
+                          padding: "0.25rem 0.5rem",
+                          backgroundColor: email.reminder_count > 0 ? "#fef3c7" : "#f3f4f6",
+                          color: email.reminder_count > 0 ? "#92400e" : "#6b7280",
+                          borderRadius: "4px",
+                          fontSize: "0.85rem",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {email.reminder_count}
+                      </span>
+                    </td>
+                    <td style={{ ...cellStyle }}>
                       <span
                         style={{
                           padding: "0.5rem 1rem",
-                          backgroundColor: getStatusColor(candidate.status),
+                          backgroundColor: getStatusColor(email.status),
                           color: "white",
                           borderRadius: "4px",
                           fontSize: "0.85rem",
                           fontWeight: 500,
+                          display: "inline-block",
                         }}
                       >
-                        {getStatusLabel(candidate.status)}
+                        {getStatusLabel(email.status)}
                       </span>
+                    </td>
+                    <td style={cellStyle}>
+                      {email.status === "sent" && email.reminder_count < 3 && (
+                        <button
+                          onClick={() => sendReminder(email.candidate_email)}
+                          style={{
+                            padding: "0.5rem 1rem",
+                            backgroundColor: "#f59e0b",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            fontSize: "0.85rem",
+                            cursor: "pointer",
+                            fontWeight: 500,
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#d97706")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#f59e0b")
+                          }
+                        >
+                          🔔 Rappel
+                        </button>
+                      )}
+                      {email.status === "confirmed" && (
+                        <span style={{ color: "#10b981", fontSize: "0.85rem" }}>
+                          Confirmé le {email.confirmed_at ? formatDate(email.confirmed_at) : ""}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -321,13 +381,38 @@ export default function Dashboard() {
           borderTop: "1px solid #e5e7eb",
           color: "#999",
           fontSize: "0.875rem",
+          textAlign: "center",
         }}
       >
-        <p>Version 2.0.0 - WinkLab AI Agent avec Chatbot</p>
-        <p>Dashboard en temps réel connecté à Supabase.</p>
+        <p style={{ margin: "0.25rem 0" }}>
+          <strong>Version 2.0.0</strong> - WinkLab AI Agent avec Chatbot IA
+        </p>
+        <p style={{ margin: "0.25rem 0" }}>
+          Dashboard en temps réel • Powered by Supabase & Resend
+        </p>
       </footer>
+
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `}</style>
     </div>
   )
+}
+
+const headerStyle = {
+  padding: "1rem",
+  textAlign: "left" as const,
+  fontWeight: 600,
+  color: "#374151",
+  fontSize: "0.9rem",
+}
+
+const cellStyle = {
+  padding: "1rem",
+  color: "#111827",
 }
 
 function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
@@ -339,9 +424,20 @@ function StatCard({ label, value, color }: { label: string; value: number; color
         borderRadius: "8px",
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
         borderLeft: `4px solid ${color}`,
+        transition: "transform 0.2s, box-shadow 0.2s",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)"
+        e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)"
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)"
+        e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)"
       }}
     >
-      <p style={{ color: "#666", fontSize: "0.875rem", margin: "0 0 0.5rem 0" }}>{label}</p>
+      <p style={{ color: "#666", fontSize: "0.875rem", margin: "0 0 0.5rem 0" }}>
+        {label}
+      </p>
       <p
         style={{
           fontSize: "2rem",

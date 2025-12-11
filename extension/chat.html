@@ -12,9 +12,9 @@
       <h2>🤖 Assistant RH</h2>
       <p>Posez-moi vos questions sur les entretiens</p>
     </div>
-        <!-- Messages Area -->
+    
     <div id="messages-area" class="messages-area">
-      <div id="initial-message" class="message bot-message">
+      <div id="initial-message" class="bot-message">
         <div class="message-content">
           <p>Bonjour! Je suis l'Assistant IA WinkLab. Je peux vous aider avec:</p>
           <ul class="features-list">
@@ -24,23 +24,33 @@
             <li>✅ Vous notifier des confirmations</li>
           </ul>
           <p>Comment puis-je vous aider?</p>
+          
+          <div class="prompt-copy-section">
+            <div class="prompt-copy-header">📋 Modèle de prompt pour email</div>
+            <div class="prompt-text">adresse email du candidat: fanilo@bnjteammaker.fr; le nom c'est Fanilo; Poste: Designer; date d'entretien: 10/12/2025; heure à 13:50; cela durera 30mn; modalité: Visioconférence.</div>
+            <button id="copyPromptBtn" class="copy-button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copier le modèle
+            </button>
+            <div class="note-text">💡 Pensez à adapter les informations selon chaque candidat</div>
+          </div>
         </div>
+      </div>
+
+      <div id="chatContainer" class="chat-container">
+        <!-- Les messages dynamiques s'afficheront ici -->
+      </div>
+      
+      <div id="typingIndicator" class="typing-indicator">
+        <span></span>
+        <span></span>
+        <span></span>
       </div>
     </div>
 
-    <!-- Container pour les messages -->
-    <div id="chatContainer" class="chat-container">
-      <!-- Les messages s'afficheront ici -->
-    </div>
-
-    <!-- Indicateur de saisie -->
-    <div id="typingIndicator" class="typing-indicator">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-
-    <!-- Zone de saisie -->
     <div class="chat-input-wrapper">
       <input 
         type="text" 
